@@ -1,0 +1,11 @@
+node_modules
+.next
+.env*.local
+.env
+data/projects/*
+!data/projects/.gitkeep
+next-env.d.ts
+*.tsbuildinfo
+.agents
+.claude/skills
+skills-lock.json
