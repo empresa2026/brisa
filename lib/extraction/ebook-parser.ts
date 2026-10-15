@@ -89,7 +89,12 @@ export function heuristicExtraction(text: string, title: string, pages: number):
   ).slice(0, 10);
 
   const archetype = detectArchetype(text.slice(0, 50_000), title);
-  const firstParagraph = sentences.filter((x) => x.length > 60 && !isHeading(x)).slice(0, 2).join(" ").slice(0, 500);
+  const firstParagraph = sentences
+    .filter((x) => x.length > 60 && !isHeading(x))
+    .slice(0, 2)
+    .join(" ")
+    .replace(/^(introdução|introducao|prefácio|prefacio|apresentação|apresentacao|sumário|sumario)\s+/i, "")
+    .slice(0, 500);
 
   return {
     title,
