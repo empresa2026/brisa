@@ -8,7 +8,7 @@ function withTimeout<T>(p: Promise<T>, ms = TIMEOUT_MS): Promise<T> {
 }
 
 /** Extrai frases de feature da descrição da loja (bullets e linhas curtas). */
-function featuresFromDescription(desc: string): string[] {
+export function featuresFromDescription(desc: string): string[] {
   return desc
     .split(/\r?\n|•|★|✓|✔|- /)
     .map((s) => s.replace(/<[^>]+>/g, "").trim())

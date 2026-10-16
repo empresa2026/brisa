@@ -2,6 +2,7 @@ import { z } from "zod";
 import { detectArchetype, specificTerms, type Archetype } from "../archetypes";
 import { generateStructured, llmEnabled } from "../llm";
 import type { EbookExtraction, ProjectInput, References } from "../types";
+import { searchAppStore } from "./appstore";
 import { curatedBehance, searchBehance, searchBehanceLite } from "./behance";
 import { curatedGithub, searchGithub } from "./github";
 import { curatedPlayStore, searchPlayStore, toQueries } from "./playstore";
@@ -56,9 +57,11 @@ export async function fetchReferences(input: ProjectInput, ebook?: EbookExtracti
   const log: string[] = [];
   const extra = specificTerms(input.what);
 
-  const [playstore, github, behance] = await Promise.all([
+  const storeQueries = toQueries([input.what, ebook?.theme ?? ""], terms.searchTerms);
+  const [playstore, appstore, github, behance] = await Promise.all([
     // 1º o que a pessoa digitou, na loja brasileira (é assim que o cliente final busca); depois os termos derivados.
-    attempt("Play Store", [() => searchPlayStore(toQueries([input.what, ebook?.theme ?? ""], terms.searchTerms))], 1, () => curatedPlayStore(archetype, input.what), log),
+    attempt("Play Store", [() => searchPlayStore(storeQueries)], 1, () => curatedPlayStore(archetype, input.what), log),
+    attempt("App Store", [() => searchAppStore(storeQueries)], 1, () => [], log),
     attempt("GitHub", [() => searchGithub(terms.githubTerms)], 1, () => curatedGithub(archetype, input.what), log),
     attempt(
       "Behance",
@@ -78,9 +81,10 @@ export async function fetchReferences(input: ProjectInput, ebook?: EbookExtracti
     archetype: archetype.id,
     searchTerms: Array.from(new Set(terms.searchTerms)).slice(0, 6),
     playstore,
+    appstore,
     github,
     behance,
-    insights: buildInsights(archetype, playstore),
+    insights: buildInsights(archetype, [...playstore, ...appstore]),
     generatedAt: new Date().toISOString(),
   };
   return { refs, archetype, log };
@@ -116,6 +120,16 @@ export function referencesToMarkdown(refs: References, log: string[] = []): stri
     lines.push("", a.summary, "");
     if (a.features.length) lines.push("**Features:**", ...a.features.map((f) => `- ${f}`), "");
     if (a.reviews.length) lines.push("**Reviews:**", ...a.reviews.map((r) => `- (${r.score}★) ${r.text}`), "");
+  }
+  if (refs.appstore?.length) {
+    lines.push("## Apple App Store", "");
+    for (const a of refs.appstore) {
+      lines.push(`### [${a.title}](${a.url}) — ${a.developer} ${badge(a.source)}`);
+      if (a.rating) lines.push(`Nota ${a.rating.toFixed(1)}${a.installs ? ` · ${a.installs}` : ""}`);
+      lines.push("", a.summary, "");
+      if (a.features.length) lines.push("**Features:**", ...a.features.map((f) => `- ${f}`), "");
+      if (a.reviews.length) lines.push("**Reviews:**", ...a.reviews.map((r) => `- (${r.score}★) ${r.text}`), "");
+    }
   }
   lines.push("## GitHub", "");
   for (const r of refs.github) {

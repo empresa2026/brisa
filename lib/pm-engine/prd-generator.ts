@@ -82,7 +82,7 @@ function normalizePRD(prd: PRD, archetype: Archetype, input: ProjectInput, ebook
 function liveFeatures(refs: References | null) {
   const out: PRD["mustHave"] = [];
   const seen = new Set<string>();
-  for (const app of refs?.playstore ?? []) {
+  for (const app of [...(refs?.playstore ?? []), ...(refs?.appstore ?? [])]) {
     if (app.source !== "live") continue;
     for (const raw of app.features) {
       const text = raw.replace(/^[\s•\-–*✓✔★]+/, "").replace(/\s+/g, " ").trim();
@@ -94,7 +94,7 @@ function liveFeatures(refs: References | null) {
       out.push({
         name: name.charAt(0).toUpperCase() + name.slice(1),
         description: text.length > name.length ? text : `${name} — presente nos apps líderes do nicho.`,
-        why: `Presente em ${app.title}${app.rating ? ` (★ ${app.rating.toFixed(1)} na Play Store)` : " (Play Store)"}.`,
+        why: `Presente em ${app.title}${app.rating ? ` (★ ${app.rating.toFixed(1)})` : ""}, app real encontrado nas lojas.`,
       });
     }
   }

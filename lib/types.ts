@@ -61,6 +61,8 @@ export interface References {
   archetype: string;
   searchTerms: string[];
   playstore: StoreApp[];
+  /** Ausente em projetos criados antes da integração com a Apple App Store. */
+  appstore?: StoreApp[];
   github: GithubRepo[];
   behance: DesignRef[];
   insights: string[];

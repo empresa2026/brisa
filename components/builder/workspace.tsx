@@ -18,7 +18,7 @@ import type { StepId } from "@/lib/types";
 
 const STEPS: { id: StepId; label: string; desc: string; icon: typeof Search; endpoint?: string }[] = [
   { id: "ebook", label: "Leitura do e-book", desc: "Tema, capítulos, exercícios e monetização", icon: BookOpen },
-  { id: "references", label: "Reference Engine", desc: "Google Play, GitHub e Behance", icon: Search, endpoint: "/api/fetch-references" },
+  { id: "references", label: "Reference Engine", desc: "Google Play, App Store, GitHub e Behance", icon: Search, endpoint: "/api/fetch-references" },
   { id: "prd", label: "PM Engine", desc: "PRD com 10 must-have, 5 luxo, 3 planos", icon: Compass, endpoint: "/api/generate-prd" },
   { id: "design", label: "Design Engine", desc: "Direção de arte e design system", icon: Palette, endpoint: "/api/generate-design" },
   { id: "build", label: "Build Engine", desc: "Telas do app e starter kit", icon: Hammer, endpoint: "/api/build-app" },
@@ -246,6 +246,9 @@ export function Workspace({ initial, autoRun }: { initial: ProjectBundle; autoRu
               {references ? (
                 <div className="space-y-8">
                   <RefGroup title="Google Play" items={references.playstore.map((a) => ({ title: a.title, sub: `${a.developer}${a.rating ? ` · ★ ${a.rating.toFixed(1)}` : ""}`, body: a.summary, tags: a.features.slice(0, 4), url: a.url, live: a.source === "live", icon: a.icon }))} />
+                  {!!references.appstore?.length && (
+                    <RefGroup title="Apple App Store" items={references.appstore.map((a) => ({ title: a.title, sub: `${a.developer}${a.rating ? ` · ★ ${a.rating.toFixed(1)}` : ""}`, body: a.summary, tags: a.features.slice(0, 4), url: a.url, live: a.source === "live", icon: a.icon }))} />
+                  )}
                   <RefGroup title="GitHub" items={references.github.map((r) => ({ title: r.fullName, sub: r.stars ? `★ ${r.stars.toLocaleString("pt-BR")}${r.language ? ` · ${r.language}` : ""}` : "open source", body: r.description, tags: r.topics.slice(0, 4), url: r.url, live: r.source === "live" }))} />
                   <RefGroup title="Behance" items={references.behance.map((d) => ({ title: d.title, sub: d.author, body: d.notes, tags: [], url: d.url, live: d.source === "live", icon: d.cover }))} />
                   <Card className="p-5">

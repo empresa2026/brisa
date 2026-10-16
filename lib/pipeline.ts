@@ -68,8 +68,9 @@ export async function runReferences(id: string) {
     await writeFile(id, "references.md", referencesToMarkdown(refs, log));
     return refs;
   }, (r) => {
-    const live = [...r.playstore, ...r.github, ...r.behance].filter((x) => x.source === "live").length;
-    return `${r.playstore.length} apps · ${r.github.length} repos · ${r.behance.length} designs${live ? ` (${live} ao vivo)` : " (biblioteca curada)"}`;
+    const apple = r.appstore ?? [];
+    const live = [...r.playstore, ...apple, ...r.github, ...r.behance].filter((x) => x.source === "live").length;
+    return `${r.playstore.length} Google Play · ${apple.length} App Store · ${r.github.length} repos · ${r.behance.length} designs${live ? ` (${live} ao vivo)` : " (biblioteca curada)"}`;
   });
 }
 
