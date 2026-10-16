@@ -13,7 +13,7 @@ const NAME_BANK: Record<string, string[]> = {
   realestate: ["Morada", "Chave", "Endereço", "Lar"],
   pets: ["Patinha", "Bicho Bom", "Focinho", "Matilha"],
   retail: ["Vitrine", "Atelier", "Arara", "Maison"],
-  services: ["Prumo", "Agenda Pro", "Ofício", "Norte"],
+  services: ["Prumo", "Norte", "Ofício", "Lume"],
 };
 
 function hash(s: string) {
@@ -78,15 +78,63 @@ function normalizePRD(prd: PRD, archetype: Archetype, input: ProjectInput, ebook
   };
 }
 
+/** Features reais extraídas das descrições dos apps encontrados ao vivo na Play Store. */
+function liveFeatures(refs: References | null) {
+  const out: PRD["mustHave"] = [];
+  const seen = new Set<string>();
+  for (const app of refs?.playstore ?? []) {
+    if (app.source !== "live") continue;
+    for (const raw of app.features) {
+      const text = raw.replace(/^[\s•\-–*✓✔★]+/, "").replace(/\s+/g, " ").trim();
+      const name = text.split(/[:.;!–-]/)[0].trim();
+      if (name.length < 6 || name.length > 70) continue;
+      const key = name.toLowerCase().slice(0, 24);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        description: text.length > name.length ? text : `${name} — presente nos apps líderes do nicho.`,
+        why: `Presente em ${app.title}${app.rating ? ` (★ ${app.rating.toFixed(1)} na Play Store)` : " (Play Store)"}.`,
+      });
+    }
+  }
+  return out;
+}
+
+const STOPWORDS = new Set(["para", "com", "de", "da", "do", "das", "dos", "em", "e", "a", "o", "os", "as", "um", "uma", "app", "aplicativo", "meu", "minha"]);
+
+function namesFromInput(what: string) {
+  const word = what
+    .split(/[\s,/]+/)
+    .map((w) => w.replace(/[^\p{L}]/gu, ""))
+    .find((w) => w.length >= 4 && !STOPWORDS.has(w.toLowerCase()));
+  if (!word) return NAME_BANK.services;
+  const W = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  return [`${W} Pro`, `Meu ${W}`, `${W}+`, `${W} Hub`];
+}
+
 export function offlinePRD(archetype: Archetype, input: ProjectInput, refs: References | null, ebook?: EbookExtraction | null): PRD {
+  const generic = archetype.apps.length === 0;
   const isPool = /piscina|pool/i.test(input.what);
-  const names = isPool ? ["Cristal Pro", "Piscina Clara", "Azul Pro", "Lâmina"] : NAME_BANK[archetype.id] ?? NAME_BANK.services;
+  const names = isPool
+    ? ["Cristal Pro", "Piscina Clara", "Azul Pro", "Lâmina"]
+    : generic
+      ? namesFromInput(input.what)
+      : NAME_BANK[archetype.id] ?? NAME_BANK.services;
   const appName = names[hash(input.what + input.where) % names.length];
   const who = input.who || `${archetype.units.client}s que buscam ${archetype.label.toLowerCase()}`;
   const where = input.where || "Brasil";
-  const refNames = refs?.playstore.map((a) => a.title).join(", ") || archetype.apps.map((a) => a.title).join(", ");
+  const refNames =
+    refs?.playstore.filter((a) => a.source === "live").map((a) => a.title).join(", ") ||
+    archetype.apps.map((a) => a.title).join(", ") ||
+    "os apps genéricos do mercado";
 
-  const mustHave = [...archetype.mustHave];
+  // Nicho fora da biblioteca: as features vêm dos concorrentes reais encontrados (até 6).
+  // Nicho conhecido: até 2 features reais entram no lugar das menos específicas.
+  const live = liveFeatures(refs);
+  const mustHave = generic
+    ? [...live.slice(0, 6), ...archetype.mustHave].slice(0, 10)
+    : [...archetype.mustHave.slice(0, 8), ...live.slice(0, 2), ...archetype.mustHave.slice(8)].slice(0, 10);
   if (ebook) {
     mustHave.splice(7, 2,
       {
@@ -105,7 +153,7 @@ export function offlinePRD(archetype: Archetype, input: ProjectInput, refs: Refe
   return {
     appName,
     tagline: taglineFor(archetype, input),
-    problem: `${capitalize(who)} em ${where} não têm uma ferramenta simples que una ${archetype.mustHave[0].name.toLowerCase()} e ${archetype.mustHave[1].name.toLowerCase()}. Hoje se viram com WhatsApp, planilhas e apps genéricos em inglês (${refNames}), que não falam a língua do cliente brasileiro nem cobram via Pix.`,
+    problem: `${capitalize(who)} em ${where} não têm uma ferramenta simples que una ${mustHave[0].name.toLowerCase()} e ${mustHave[1].name.toLowerCase()}. Hoje se viram com WhatsApp, planilhas e apps que não foram feitos para isso (${refNames}), que não falam a língua do cliente brasileiro nem cobram via Pix.`,
     positioning: `O ${appName} entrega a experiência dos líderes globais (${refNames}) com o método de ${input.what}, em português, com Pix e WhatsApp nativos e foco em ${who}.`,
     personas: [
       { name: "Cliente final", profile: capitalize(who), job: `Conseguir resultado com ${input.what} sem complicação`, pain: "Falta de acompanhamento e de clareza do próximo passo" },

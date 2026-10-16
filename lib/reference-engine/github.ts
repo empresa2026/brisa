@@ -39,7 +39,7 @@ async function search(octokit: Octokit, terms: string[], limit: number): Promise
   return results;
 }
 
-export function curatedGithub(archetype: Archetype): GithubRepo[] {
+export function curatedGithub(archetype: Archetype, userQuery = ""): GithubRepo[] {
   const repos: GithubRepo[] = archetype.repos.map((r) => ({
     fullName: r.fullName,
     url: `https://github.com/${r.fullName}`,
@@ -49,7 +49,7 @@ export function curatedGithub(archetype: Archetype): GithubRepo[] {
     source: "curated",
   }));
   // Completa com buscas do GitHub (sempre válidas) para chegar a 3 referências.
-  for (const term of archetype.searchTerms) {
+  for (const term of archetype.searchTerms.length ? archetype.searchTerms : [userQuery].filter(Boolean)) {
     if (repos.length >= 3) break;
     repos.push({
       fullName: `Busca: ${term}`,

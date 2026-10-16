@@ -149,20 +149,29 @@ const SAMPLES: Record<string, Sample> = {
   },
 };
 
-function sampleFor(id: string): Sample {
-  return SAMPLES[id] ?? {
-    ...SAMPLES.fieldservice,
-    greeting: "Olá!",
-    heroValue: "5 atendimentos",
-    heroLabel: "na sua agenda de hoje",
-    schedule: [{ title: "09:00 · Ana Souza", subtitle: "Atendimento inicial", icon: "calendar" }, { title: "11:00 · Bruno Lima", subtitle: "Retorno", icon: "calendar" }, { title: "15:00 · Carla Dias", subtitle: "Proposta", icon: "file", badge: "Novo" }],
-    people: [{ title: "Ana Souza", subtitle: "Cliente desde 2024", icon: "user" }, { title: "Bruno Lima", subtitle: "Proposta enviada", icon: "user", badge: "Quente" }, { title: "Carla Dias", subtitle: "Primeiro contato", icon: "user" }],
-    cards: [{ title: "Pacote Essencial", subtitle: "2 atendimentos/mês", value: "R$ 290", icon: "briefcase" }, { title: "Pacote Pro", subtitle: "4 atendimentos + suporte", value: "R$ 520", icon: "crown" }],
-    checklist: [{ title: "Confirmar agenda", done: true }, { title: "Enviar proposta", done: false }, { title: "Cobrar pendências", done: false }],
-    progress: [{ title: "Meta do mês", subtitle: "R$ 9.800 de R$ 15.000", progress: 65, icon: "target" }],
-    feed: [{ title: "Pix recebido", subtitle: "Ana Souza · R$ 290", meta: "10:12" }, { title: "Proposta aprovada", subtitle: "Bruno Lima · R$ 520", meta: "ontem" }],
-    chips: ["Hoje", "Semana", "Mês"],
+/** Nicho fora da biblioteca: o conteúdo das telas é montado a partir do PRD e do texto do usuário. */
+function genericSample(prd: PRD, input: ProjectInput): Sample {
+  const f = prd.mustHave;
+  const icons: IconName[] = ["sparkles", "star", "zap", "target", "heart", "crown"];
+  const topic = input.what.toLowerCase();
+  return {
+    greeting: "Olá, Ana",
+    heroValue: prd.appName,
+    heroLabel: f[0]?.description ?? prd.tagline,
+    stats: [{ title: "Clientes ativos", value: "128", icon: "users", meta: "+18%" }, { title: "Este mês", value: "R$ 12.400", icon: "wallet", meta: "+9%" }, { title: "Avaliação", value: "4,9", icon: "star" }],
+    schedule: f.slice(1, 4).map((x, i) => ({ title: x.name, subtitle: ["Hoje", "Amanhã", "Esta semana"][i], icon: icons[i] })),
+    people: f.slice(0, 4).map((x, i) => ({ title: x.name, subtitle: x.description.slice(0, 60), icon: icons[i % icons.length] })),
+    cards: f.slice(0, 6).map((x, i) => ({ title: x.name, subtitle: x.why.slice(0, 40), icon: icons[i % icons.length], badge: i === 0 ? "Destaque" : undefined })),
+    chart: chart([5200, 6100, 7400, 8300, 10100, 12400], brl),
+    checklist: [{ title: `Completar perfil de ${topic}`.slice(0, 60), done: true }, { title: f[1]?.name ?? "Explorar o app", done: false }, { title: f[2]?.name ?? "Convidar um amigo", done: false }],
+    progress: [{ title: "Sua jornada", subtitle: "3 de 5 etapas", progress: 60, icon: "target" }, { title: f[5]?.name ?? "Histórico", subtitle: "Atualizado hoje", progress: 80, icon: "trending" }],
+    feed: [{ title: "Equipe " + prd.appName, subtitle: `Bem-vinda! Conte o que você procura em ${topic}.`, meta: "agora" }, { title: "Você", subtitle: "Quero saber mais sobre os planos.", meta: "1 min" }],
+    chips: ["Todos", "Novidades", "Favoritos"],
   };
+}
+
+function sampleFor(id: string, prd: PRD, input: ProjectInput): Sample {
+  return SAMPLES[id] ?? genericSample(prd, input);
 }
 
 /* ---------- Motor offline: monta telas a partir das abas e do PRD ---------- */
@@ -186,6 +195,7 @@ const SUBTITLES: Record<string, (a: Archetype) => string> = {
   practice: () => "Coloque o método em prática hoje",
   plan: () => "O que fazer até a próxima consulta",
   map: () => "Menos trânsito, mais atendimentos",
+  explore: () => "Tudo o que você oferece, em um só lugar",
 };
 
 function screenFor(tab: { id: string; label: string }, archetype: Archetype, prd: PRD, s: Sample, index: number): SpecScreen {
@@ -279,7 +289,7 @@ function screenFor(tab: { id: string; label: string }, archetype: Archetype, prd
 }
 
 export function offlineAppSpec(archetype: Archetype, prd: PRD, ds: DesignSystem, input: ProjectInput, ebook?: EbookExtraction | null): AppSpec {
-  const s = withEbook(sampleFor(archetype.id), ebook);
+  const s = withEbook(sampleFor(archetype.id, prd, input), ebook);
   return {
     name: prd.appName,
     tagline: prd.tagline,

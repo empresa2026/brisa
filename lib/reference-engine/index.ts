@@ -4,7 +4,7 @@ import { generateStructured, llmEnabled } from "../llm";
 import type { EbookExtraction, ProjectInput, References } from "../types";
 import { curatedBehance, searchBehance, searchBehanceLite } from "./behance";
 import { curatedGithub, searchGithub } from "./github";
-import { curatedPlayStore, searchPlayStore } from "./playstore";
+import { curatedPlayStore, searchPlayStore, toQueries } from "./playstore";
 
 const TermsSchema = z.object({
   searchTerms: z.array(z.string()).describe("3 termos curtos em inglês para buscar apps concorrentes na Play Store"),
@@ -15,7 +15,7 @@ const TermsSchema = z.object({
 async function deriveTerms(input: ProjectInput, archetype: Archetype, ebook?: EbookExtraction | null) {
   const base = {
     searchTerms: [...specificTerms(`${input.what} ${ebook?.theme ?? ""}`), ...archetype.searchTerms],
-    githubTerms: archetype.searchTerms,
+    githubTerms: archetype.searchTerms.length ? archetype.searchTerms : [input.what],
     designTerms: [...specificTerms(input.what).slice(0, 1).map((t) => `${t} app`), ...archetype.designTerms],
   };
   if (!llmEnabled()) return base;
@@ -57,8 +57,9 @@ export async function fetchReferences(input: ProjectInput, ebook?: EbookExtracti
   const extra = specificTerms(input.what);
 
   const [playstore, github, behance] = await Promise.all([
-    attempt("Play Store", [() => searchPlayStore(terms.searchTerms)], 2, () => curatedPlayStore(archetype), log),
-    attempt("GitHub", [() => searchGithub(terms.githubTerms)], 1, () => curatedGithub(archetype), log),
+    // 1º o que a pessoa digitou, na loja brasileira (é assim que o cliente final busca); depois os termos derivados.
+    attempt("Play Store", [() => searchPlayStore(toQueries([input.what, ebook?.theme ?? ""], terms.searchTerms))], 1, () => curatedPlayStore(archetype, input.what), log),
+    attempt("GitHub", [() => searchGithub(terms.githubTerms)], 1, () => curatedGithub(archetype, input.what), log),
     attempt(
       "Behance",
       [() => searchBehance(terms.designTerms), () => searchBehanceLite(terms.designTerms)],

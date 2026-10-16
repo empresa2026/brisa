@@ -163,6 +163,16 @@ export function Workspace({ initial, autoRun }: { initial: ProjectBundle; autoRu
             )}
           </Card>
 
+          {meta.engine === "offline" && (
+            <div role="note" className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+              <p className="font-semibold">Rodando sem IA (motor offline)</p>
+              <p className="mt-1">
+                O produto foi montado com a biblioteca de nichos e os apps encontrados nas lojas. Para um app 100% sob medida para
+                “{meta.input.what}”, configure a variável <code className="rounded bg-amber-100 px-1">ANTHROPIC_API_KEY</code> na Vercel e clique em Refazer no PM Engine.
+              </p>
+            </div>
+          )}
+
           <Tabs defaultValue="produto" className="mt-8">
             <TabsList>
               <TabsTrigger value="produto" disabled={!prd}><Layers /> Produto</TabsTrigger>
