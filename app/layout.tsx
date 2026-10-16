@@ -6,7 +6,7 @@ const sans = Hanken_Grotesk({ subsets: ["latin"], variable: "--font-sans", displ
 const display = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-display", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Builder 1M — da ideia ao app com cara de 1 milhão",
+  title: "Brisa — da ideia ao app com cara de 1 milhão",
   description: "Conte o que você faz em 2 linhas (ou suba seu e-book). Pesquisamos o mercado, escrevemos o produto e desenhamos o app para você.",
 };
 

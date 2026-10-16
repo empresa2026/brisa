@@ -12,7 +12,7 @@ async function src(rel: string) {
 function claudeMd(prd: PRD, ds: DesignSystem) {
   return `# CLAUDE.md — ${prd.appName}
 
-Este projeto foi gerado pelo **App Builder 1M**. Produto, referências e design já estão decididos — não entreviste o cliente.
+Este projeto foi gerado pelo **Brisa**. Produto, referências e design já estão decididos — não entreviste o cliente.
 
 ## Fontes da verdade
 - \`docs/PRD.md\` — 10 must-have, 5 luxo, 3 planos, modelo de dados
@@ -43,7 +43,7 @@ function readme(prd: PRD) {
 
 > ${prd.tagline}
 
-Starter kit gerado pelo App Builder 1M: protótipo navegável + documentação de produto + banco Supabase com RLS.
+Starter kit gerado pelo Brisa: protótipo navegável + documentação de produto + banco Supabase com RLS.
 
 ## Rodar
 \`\`\`bash

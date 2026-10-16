@@ -1,4 +1,4 @@
-# Builder 1M
+# Brisa
 
 Plataforma Next.js onde uma pessoa leiga descreve o negócio em 2 linhas (ou sobe um e-book em PDF) e recebe um app com cara de produto de 1 milhão — **sem ser entrevistada**. Todo o trabalho de Product Owner é feito pelo sistema, com base em referências reais.
 
@@ -7,7 +7,7 @@ Plataforma Next.js onde uma pessoa leiga descreve o negócio em 2 linhas (ou sob
 | Fase | Motor | Saída (`data/projects/{id}/`) |
 |---|---|---|
 | 1. Input leigo | tela simples: o que faz / onde / quem paga / e-book | `input.json`, `ebook.json` |
-| 2. Reference Engine | Google Play (`google-play-scraper`), GitHub (Octokit), Behance (Puppeteer) | `references.md`, `references.json` |
+| 2. Reference Engine | Google Play (`google-play-scraper`), Apple App Store (API oficial da Apple), GitHub (Octokit), Behance (Puppeteer) | `references.md`, `references.json` |
 | 3. PM Engine | PM sênior: 10 must-have, 5 luxo, 3 planos, sem perguntar nada | `PRD.md`, `PRODUCT.md`, `DESIGN.md` |
 | 4. Design Engine | direção de arte por nicho (paleta, tipografia, princípios anti-“AI slop”) | `design.json`, `DESIGN.md` |
 | 5. Build Engine | telas do app + starter kit Next.js 14 + Supabase (RLS) + Prisma | `app-spec.json`, `.zip` para download |
@@ -56,7 +56,8 @@ Sem Supabase, os projetos são salvos em disco (`DATA_DIR`, padrão `./data/proj
 ## Testes
 
 ```bash
-pnpm test:pipeline [ebook.pdf]   # roda o pipeline completo em 4 nichos e valida 10/5/3, telas, RLS e zip
+pnpm test:pipeline [ebook.pdf]   # pipeline completo em 4 nichos: 10/5/3, telas, RLS e zip
+pnpm test:rls                    # Postgres real: isolamento entre usuários em todos os nichos
 pnpm typecheck && pnpm lint && pnpm build
 ```
 

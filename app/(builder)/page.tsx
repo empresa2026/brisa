@@ -1,13 +1,13 @@
-import { ArrowDownRight, Check, Compass, FileText, Hammer, Palette, Search, Smartphone } from "lucide-react";
+import { ArrowDownRight, Check } from "lucide-react";
 import { InputForm } from "@/components/builder/input-form";
 import { SiteHeader } from "@/components/builder/site-header";
 
 const PHASES = [
-  { n: "01", icon: FileText, title: "Você conta em 2 linhas", body: "O que faz, onde atua e quem paga. Se tiver e-book, o método vira o coração do app." },
-  { n: "02", icon: Search, title: "Pesquisamos o mercado", body: "Apps líderes na Google Play (features e reviews reais), repositórios no GitHub e designs no Behance." },
-  { n: "03", icon: Compass, title: "Um PM sênior decide", body: "PRD completo: 10 features essenciais, 5 de luxo e 3 planos de monetização — sem te entrevistar." },
-  { n: "04", icon: Palette, title: "Direção de arte do nicho", body: "Design system autoral, tipografia e paleta pensadas para o seu público. Nada de cara de template." },
-  { n: "05", icon: Hammer, title: "App pronto para seguir", body: "Protótipo navegável no celular + starter kit Next.js 14, Supabase com RLS e Prisma." },
+  { n: "1", title: "Você conta em 2 linhas", body: "O que faz, onde atua e quem paga. Se tiver e-book, o método vira o coração do app." },
+  { n: "2", title: "Pesquisamos o mercado", body: "Apps líderes na Google Play e na App Store (features e reviews reais), projetos no GitHub e designs no Behance." },
+  { n: "3", title: "Um PM sênior decide", body: "PRD completo: 10 features essenciais, 5 de luxo e 3 planos de monetização — sem te entrevistar." },
+  { n: "4", title: "Direção de arte do nicho", body: "Design system autoral, tipografia e paleta pensadas para o seu público. Nada de cara de template." },
+  { n: "5", title: "App pronto para seguir", body: "Protótipo navegável no celular + starter kit Next.js 14, Supabase com RLS e Prisma." },
 ];
 
 const DELIVERABLES = [
@@ -29,14 +29,9 @@ export default function BuilderHome() {
   return (
     <div className="min-h-dvh">
       <div className="relative overflow-hidden bg-[#121214] text-white">
-        <div className="grain absolute inset-0 opacity-[0.35] [background-image:radial-gradient(rgba(255,255,255,.07)_1px,transparent_1px)]" />
-        <div className="absolute -right-40 -top-40 size-[520px] rounded-full bg-accent/20 blur-3xl" />
         <SiteHeader dark />
         <section className="container relative grid gap-12 pb-20 pt-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-28 lg:pt-20">
           <div className="flex flex-col justify-center">
-            <p className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-white/15 px-3 py-1 text-xs font-medium text-white/80">
-              <span className="size-1.5 rounded-full bg-accent" /> Sem entrevista. A gente faz o trabalho de produto.
-            </p>
             <h1 className="text-balance font-display text-[44px] leading-[0.98] tracking-tight sm:text-6xl lg:text-[76px]">
               Da ideia de 2 linhas ao app com <em className="text-accent not-italic">cara de 1 milhão.</em>
             </h1>
@@ -53,17 +48,13 @@ export default function BuilderHome() {
 
       <section className="container py-20 lg:py-28">
         <div className="mb-12 max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Como funciona</p>
-          <h2 className="mt-2 text-balance font-display text-4xl leading-tight sm:text-5xl">Cinco motores. Zero perguntas para você.</h2>
+          <h2 className=" text-balance font-display text-4xl leading-tight sm:text-5xl">Cinco motores. Zero perguntas para você.</h2>
         </div>
-        <ol className="grid gap-px overflow-hidden rounded-3xl border bg-border sm:grid-cols-2 lg:grid-cols-5">
+        <ol className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
           {PHASES.map((p) => (
-            <li key={p.n} className="bg-card p-6">
-              <div className="flex items-center justify-between">
-                <p.icon className="size-5" />
-                <span className="font-display text-2xl text-muted-foreground">{p.n}</span>
-              </div>
-              <h3 className="mt-8 font-semibold">{p.title}</h3>
+            <li key={p.n} className="border-t-2 border-foreground pt-5">
+              <span className="tabular font-display text-3xl">{p.n}</span>
+              <h3 className="mt-3 font-semibold leading-snug">{p.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
             </li>
           ))}
@@ -73,17 +64,16 @@ export default function BuilderHome() {
       <section className="border-y bg-card">
         <div className="container grid gap-12 py-20 lg:grid-cols-2 lg:py-24">
           <div>
-            <Smartphone className="size-6" />
-            <h2 className="mt-4 text-balance font-display text-4xl leading-tight">O que você recebe no final</h2>
+            <h2 className="text-balance font-display text-4xl leading-tight">O que você recebe no final</h2>
             <p className="mt-4 max-w-md text-muted-foreground">
               Tudo o que uma consultoria de produto entregaria em semanas — em minutos, baseado em apps reais que já faturam.
             </p>
           </div>
-          <ul className="grid gap-3 sm:grid-cols-2">
+          <ul className="divide-y self-center border-y">
             {DELIVERABLES.map((d) => (
-              <li key={d} className="flex gap-3 rounded-2xl border bg-background p-4 text-sm">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-accent"><Check className="size-3" strokeWidth={3} /></span>
-                {d}
+              <li key={d} className="flex items-center gap-3 py-4">
+                <Check className="size-4 shrink-0" strokeWidth={3} aria-hidden />
+                <span>{d}</span>
               </li>
             ))}
           </ul>
@@ -111,7 +101,7 @@ export default function BuilderHome() {
       </section>
 
       <footer className="border-t py-8 text-center text-xs text-muted-foreground">
-        Builder 1M · referências públicas da Google Play, GitHub e Behance são usadas apenas como pesquisa de mercado.
+        Brisa · referências públicas da Google Play, App Store, GitHub e Behance são usadas apenas como pesquisa de mercado.
       </footer>
     </div>
   );

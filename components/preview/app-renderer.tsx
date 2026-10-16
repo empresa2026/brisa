@@ -6,9 +6,9 @@
  */
 import { useMemo, useState, type CSSProperties } from "react";
 import {
-  Bell, BookOpen, Briefcase, Building2, Calendar, Camera, ChartColumn, Check, ChevronRight, Clock, Crown, Droplet, Dumbbell,
+  BatteryFull, Bell, BookOpen, Briefcase, Building2, Calendar, Camera, ChartColumn, Check, ChevronRight, Clock, Crown, Droplet, Dumbbell,
   File, Flame, Gift, GraduationCap, Heart, Home, Leaf, Map, MessageCircle, PawPrint, Phone, Play, Receipt, Route, Scissors,
-  Settings, Shield, ShoppingBag, Sparkles, Star, Target, TrendingUp, Truck, User, Users, UtensilsCrossed, Wallet, Zap,
+  Settings, Shield, ShoppingBag, Signal, Sparkles, Star, Target, TrendingUp, Truck, User, Users, UtensilsCrossed, Wallet, Wifi, Zap,
   type LucideIcon,
 } from "lucide-react";
 import type { AppSpec, IconName, SpecItem, SpecSection } from "./spec-types";
@@ -303,7 +303,7 @@ export function AppRenderer({ spec, showOnboarding = true, className, style }: {
   return (
     <div className={`ab-root ${className ?? ""}`} style={{ ...vars, ...style }}>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <div className="ab-status"><span>9:41</span><span aria-hidden style={{ letterSpacing: 2 }}>●●● ▮</span></div>
+      <div className="ab-status"><span>9:41</span><span aria-hidden style={{ display: "inline-flex", gap: 5, alignItems: "center" }}><Signal size={14} strokeWidth={2.4} /><Wifi size={14} strokeWidth={2.4} /><BatteryFull size={18} strokeWidth={2} /></span></div>
 
       {onb && (
         <div className="ab-onb">

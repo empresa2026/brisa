@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { listProjects } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Meus apps — Builder 1M" };
+export const metadata = { title: "Meus apps — Brisa" };
 
 export default async function ProjectsPage() {
   const projects = await listProjects();

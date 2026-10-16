@@ -199,7 +199,7 @@ function taglineFor(a: Archetype, input: ProjectInput) {
     pets: "Cuidado de verdade para quem é da família.",
     retail: "Sua marca, com experiência de grande varejo.",
   };
-  return map[a.id] ?? `Tudo de ${input.what} em um app.`;
+  return map[a.id] ?? `Tudo de ${input.what.charAt(0).toLowerCase()}${input.what.slice(1)} em um app.`;
 }
 
 function voiceFor(a: Archetype) {

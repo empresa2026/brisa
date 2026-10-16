@@ -63,7 +63,7 @@ export function InputForm() {
   }
 
   return (
-    <form onSubmit={submit} className="relative rounded-[28px] border border-white/10 bg-white p-5 text-foreground shadow-[0_40px_120px_-40px_rgba(0,0,0,.6)] sm:p-7">
+    <form onSubmit={submit} className="relative rounded-2xl bg-white p-5 text-foreground shadow-[0_24px_60px_-20px_rgba(0,0,0,.55)] sm:p-7">
       <div className="space-y-5">
         <Field icon={<Wand2 />} label="O que você faz?" hint="ex: coach de finanças, limpeza de piscinas">
           <Input name="what" autoComplete="off" value={what} onChange={(e) => setWhat(e.target.value)} placeholder="Coach de finanças…" maxLength={400} aria-required />
@@ -118,7 +118,7 @@ export function InputForm() {
       </div>
 
       <div className="mt-6 border-t pt-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ou experimente</p>
+        <p className="mb-2 text-sm text-muted-foreground">Sem ideia? Experimente um exemplo:</p>
         <div className="flex flex-wrap gap-2">
           {EXAMPLES.map((ex) => (
             <button

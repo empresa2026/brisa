@@ -116,7 +116,6 @@ export function Workspace({ initial, autoRun }: { initial: ProjectBundle; autoRu
             <Phone spec={spec} />
           ) : (
             <div className="relative mx-auto flex aspect-[9/19] w-full max-w-[370px] flex-col items-center justify-center overflow-hidden rounded-[54px] bg-[#121214] p-10 text-center text-white">
-              <div className="absolute -top-20 size-72 animate-pulse rounded-full bg-accent/20 blur-3xl" />
               <Loader2 className="relative mb-5 size-8 animate-spin text-accent" />
               <p className="relative font-display text-3xl leading-tight">{running ? STEPS.find((s) => s.id === running)?.label : "Na fila"}</p>
               <p className="relative mt-3 text-sm text-white/60">{running ? STEPS.find((s) => s.id === running)?.desc : "Preparando os motores"}</p>
@@ -187,8 +186,7 @@ export function Workspace({ initial, autoRun }: { initial: ProjectBundle; autoRu
                 <div className="space-y-10">
                   {ebook && (
                     <Card className="p-5">
-                      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"><Upload className="size-3.5" /> Do seu e-book</p>
-                      <h3 className="mt-2 font-display text-2xl">{ebook.title}</h3>
+                      <h3 className="flex items-start gap-2 font-display text-2xl"><Upload className="mt-1.5 size-4 shrink-0 text-muted-foreground" aria-hidden />{ebook.title}</h3>
                       <p className="mt-2 text-sm text-muted-foreground">{ebook.summary}</p>
                       <p className="mt-3 text-sm"><b>{ebook.chapters.length}</b> capítulos · <b>{ebook.exercises.length}</b> exercícios viraram funcionalidades</p>
                     </Card>
@@ -201,8 +199,7 @@ export function Workspace({ initial, autoRun }: { initial: ProjectBundle; autoRu
                     <ol className="grid gap-3 sm:grid-cols-2">
                       {prd.mustHave.map((f, i) => (
                         <li key={i} className="rounded-2xl border bg-card p-4">
-                          <div className="flex gap-3">
-                            <span className="font-display text-2xl leading-none text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                          <div>
                             <div>
                               <p className="font-semibold">{f.name}</p>
                               <p className="mt-1 text-sm text-muted-foreground">{f.description}</p>
