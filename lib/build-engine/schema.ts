@@ -46,11 +46,12 @@ const SQL_TYPES: Record<FieldType, string> = {
 };
 
 /**
- * Migração Supabase seguindo supabase-postgres-best-practices:
- * - owner_id com default auth.uid() e RLS por dono em todas as tabelas
- * - (select auth.uid()) nas policies (avaliado 1x por query, não por linha)
- * - índices em todas as FKs e em owner_id
- * - políticas separadas por operação, restritas ao papel authenticated
+ * Migração Supabase revisada com a skill supabase-postgres-best-practices:
+ * - schema-primary-keys: bigint identity (sem fragmentação de índice do UUIDv4)
+ * - security-rls-basics/performance: RLS por dono em todas as tabelas, (select auth.uid()) avaliado 1x por query
+ * - schema-foreign-key-indexes: índice em toda FK
+ * - query-composite-indexes: (owner_id, created_at desc) para "meus itens, mais recentes primeiro"
+ * - security-privileges: o papel anon não tem acesso; authenticated só passa pelas policies
  */
 export function toSupabaseSQL(prd: PRD): string {
   const entities = cleanEntities(prd.entities);
@@ -79,23 +80,25 @@ export function toSupabaseSQL(prd: PRD): string {
 
   for (const e of ordered) {
     const cols = [
-      "  id uuid primary key default gen_random_uuid()",
+      "  id bigint generated always as identity primary key",
       "  owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade",
       ...e.fields.map((f) => {
         const target = f.type === "uuid" ? fkTarget(f.name, tables) : null;
-        return `  ${f.name} ${SQL_TYPES[f.type]}${target ? ` references public.${target}(id) on delete cascade` : ""}`;
+        // FK aponta para PK bigint; uuid sem tabela-alvo continua uuid.
+        return target ? `  ${f.name} bigint references public.${target}(id) on delete cascade` : `  ${f.name} ${SQL_TYPES[f.type]}`;
       }),
       "  created_at timestamptz not null default now()",
       "  updated_at timestamptz not null default now()",
     ];
     L.push(`-- ${e.label}`, `create table public.${e.name} (`, cols.join(",\n"), ");", "");
-    L.push(`create index ${e.name}_owner_id_idx on public.${e.name} (owner_id);`);
+    L.push(`create index ${e.name}_owner_created_idx on public.${e.name} (owner_id, created_at desc);`);
     for (const f of e.fields) {
       if (f.type === "uuid" && fkTarget(f.name, tables)) L.push(`create index ${e.name}_${f.name}_idx on public.${e.name} (${f.name});`);
     }
     L.push(
       `create trigger ${e.name}_updated_at before update on public.${e.name} for each row execute function public.set_updated_at();`,
       `alter table public.${e.name} enable row level security;`,
+      `revoke all on table public.${e.name} from anon;`,
       `create policy "${e.name}_select_own" on public.${e.name} for select to authenticated using ((select auth.uid()) = owner_id);`,
       `create policy "${e.name}_insert_own" on public.${e.name} for insert to authenticated with check ((select auth.uid()) = owner_id);`,
       `create policy "${e.name}_update_own" on public.${e.name} for update to authenticated using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id);`,
@@ -123,6 +126,7 @@ function pascal(s: string) {
 
 export function toPrismaSchema(prd: PRD): string {
   const entities = cleanEntities(prd.entities);
+  const tables = entities.map((e) => e.name);
   const L = [
     "// Prisma espelha o schema do Supabase (supabase/migrations). A migração SQL é a fonte da verdade,",
     "// pois contém RLS. Use `prisma db pull` após aplicar a migração para sincronizar.",
@@ -139,15 +143,16 @@ export function toPrismaSchema(prd: PRD): string {
   ];
   for (const e of entities) {
     L.push(`/// ${e.label}`, `model ${pascal(e.name)} {`);
-    L.push('  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid');
+    L.push("  id        BigInt   @id @default(autoincrement())");
     L.push('  ownerId   String   @map("owner_id") @db.Uuid');
     for (const f of e.fields) {
       const name = f.name.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase());
-      L.push(`  ${name} ${PRISMA_TYPES[f.type]}${name !== f.name ? ` @map("${f.name}")` : ""}`);
+      const type = f.type === "uuid" && fkTarget(f.name, tables) ? "BigInt?" : PRISMA_TYPES[f.type];
+      L.push(`  ${name} ${type}${name !== f.name ? ` @map("${f.name}")` : ""}`);
     }
     L.push('  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)');
     L.push('  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)');
-    L.push("", "  @@index([ownerId])", `  @@map("${e.name}")`, "}", "");
+    L.push("", "  @@index([ownerId, createdAt(sort: Desc)])", `  @@map("${e.name}")`, "}", "");
   }
   return L.join("\n");
 }
